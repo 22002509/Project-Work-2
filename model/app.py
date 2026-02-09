@@ -7,9 +7,8 @@ st.set_page_config(page_title="Stress Detection", layout="wide")
 
 st.title("🧠 EEG / ECG Stress Detection Dashboard")
 
-# ✅ Safe model loading (Works Local + Streamlit Cloud)
+# Load models safely
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 main_model = joblib.load(os.path.join(BASE_DIR, "stress_model.pkl"))
 eeg_model = joblib.load(os.path.join(BASE_DIR, "eeg_model.pkl"))
 
@@ -27,11 +26,13 @@ if uploaded:
 
     # Convert numeric safely
     df_num = df.apply(pd.to_numeric, errors='coerce')
-    df_num = df_num.dropna(axis=1, how='all')
-    df_num = df_num.dropna()
 
-    # Decide model automatically
-    if df_num.shape[1] > 40:
+    # Keep index mapping
+    df_num_clean = df_num.dropna(axis=1, how='all')
+    df_num_clean = df_num_clean.dropna()
+
+    # Decide model
+    if df_num_clean.shape[1] > 40:
         model = eeg_model
         st.success("EEG Model Selected")
     else:
@@ -40,11 +41,11 @@ if uploaded:
 
     # Align features
     features = model.named_steps['scaler'].feature_names_in_
-    aligned = pd.DataFrame()
+    aligned = pd.DataFrame(index=df_num_clean.index)
 
     for col in features:
-        if col in df_num.columns:
-            aligned[col] = df_num[col]
+        if col in df_num_clean.columns:
+            aligned[col] = df_num_clean[col]
         else:
             aligned[col] = 0
 
@@ -53,10 +54,11 @@ if uploaded:
     # Predict
     pred = model.predict(aligned)
 
-    df["Stress Prediction"] = pred
-    df["Stress Prediction"] = df["Stress Prediction"].map(
-        {0: "No Stress", 1: "Stress"}
-    )
+    # Insert predictions safely
+    df["Stress Prediction"] = "Not Predicted"
+    df.loc[aligned.index, "Stress Prediction"] = pd.Series(pred).map(
+        {0:"No Stress",1:"Stress"}
+    ).values
 
     st.subheader("Prediction Results")
     st.dataframe(df)
