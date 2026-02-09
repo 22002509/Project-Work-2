@@ -1,14 +1,17 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
 
 st.set_page_config(page_title="Stress Detection", layout="wide")
 
 st.title("🧠 EEG / ECG Stress Detection Dashboard")
 
-# Load models
-main_model = joblib.load("stress_model.pkl")
-eeg_model = joblib.load("eeg_model.pkl")
+# ✅ Safe model loading (Works Local + Streamlit Cloud)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+main_model = joblib.load(os.path.join(BASE_DIR, "stress_model.pkl"))
+eeg_model = joblib.load(os.path.join(BASE_DIR, "eeg_model.pkl"))
 
 uploaded = st.file_uploader("Upload CSV or Excel", type=["csv","xlsx"])
 
@@ -52,7 +55,7 @@ if uploaded:
 
     df["Stress Prediction"] = pred
     df["Stress Prediction"] = df["Stress Prediction"].map(
-        {0:"No Stress", 1:"Stress"}
+        {0: "No Stress", 1: "Stress"}
     )
 
     st.subheader("Prediction Results")
