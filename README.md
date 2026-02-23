@@ -453,10 +453,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact & Support
 
-**Developer**: Your Name  
-**Email**: your.email@example.com  
-**LinkedIn**: [linkedin.com/in/yourprofile](https://linkedin.com)  
-**Portfolio**: [yourportfolio.com](https://yourportfolio.com)
+**Developer**: PRASANNA R
+**Email**: prasannaramu2703@gmail.com  
 
 ### Acknowledgments
 
